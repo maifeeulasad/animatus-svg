@@ -2,6 +2,16 @@
   "name": "animatus-svg",
   "version": "0.0.0",
   "description": "Pure TypeScript SVG animation library - automatically animate SVG elements with procedural animations",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
