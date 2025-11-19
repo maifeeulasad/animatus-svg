@@ -71,7 +71,7 @@ export function hasStroke(element: SVGElement): boolean {
   const hasStrokeStyle = style.stroke && style.stroke !== 'none';
   const hasWidth = strokeWidth !== '0' && style.strokeWidth !== '0px';
   
-  return (hasStrokeAttr || hasStrokeStyle) && hasWidth !== false;
+  return !!(hasStrokeAttr || hasStrokeStyle) && hasWidth !== false;
 }
 
 /**
@@ -84,7 +84,7 @@ export function hasFill(element: SVGElement): boolean {
   const hasFillAttr = fill && fill !== 'none';
   const hasFillStyle = style.fill && style.fill !== 'none';
   
-  return hasFillAttr || hasFillStyle;
+  return !!(hasFillAttr || hasFillStyle);
 }
 
 /**
