@@ -236,7 +236,7 @@ export class SVGAnimator implements SVGAnimatorInstance {
     if (this.runningAnimations.length > 0) {
       const totalDuration = this.getTotalDuration();
       const currentTime = Math.max(
-        ...this.runningAnimations.map(a => a.currentTime || 0)
+        ...this.runningAnimations.map(a => Number(a.currentTime) || 0)
       );
       this.state.currentTime = currentTime;
       this.state.progress = totalDuration > 0 ? currentTime / totalDuration : 0;
