@@ -10,7 +10,7 @@ import {
   GeneratedAnimation,
   SlideDirection,
 } from './../types';
-import { hasStroke, hasFill } from './../parser';
+import { hasStroke } from './../parser';
 
 /**
  * Generate stroke drawing animation (dash-offset technique)
