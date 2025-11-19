@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG Animator - Interactive Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+    }
+
+    .main-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .panel-title {
+      color: #333;
+      margin-bottom: 1.5rem;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .panel-title svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+    }
+
+    .upload-zone {
+      border: 3px dashed #667eea;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+
+    .upload-zone:hover {
+      border-color: #764ba2;
+      background: #e9ecef;
+    }
+
+    .upload-zone.dragover {
+      border-color: #764ba2;
+      background: #e7e3fc;
+    }
+
+    .upload-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 1rem;
+      opacity: 0.5;
+    }
+
+    .upload-zone h3 {
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+
+    .upload-zone p {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+
+    .upload-zone input {
+      display: none;
+    }
+
+    .preview-area {
+      background: #f8f9fa;
+      border-radius: 12px;
+      padding: 2rem;
+      min-height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .preview-area svg {
+      max-width: 100%;
+      max-height: 400px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #6c757d;
+    }
+
+    /* Controls */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control-group label {
+      font-size: 0.85rem;
+      color: #495057;
+      font-weight: 600;
+    }
+
+    .control-group input,
+    .control-group select {
+      padding: 0.6rem;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      transition: border-color 0.2s;
+    }
+
+    .control-group input:focus,
+    .control-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e9ecef;
+      color: #495057;
+    }
+
+    .btn-secondary:hover {
+      background: #dee2e6;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Demo Grid */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .demo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .demo-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .demo-card h3 {
+      color: #333;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .demo-card p {
+      color: #6c757d;
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .svg-container {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 180px;
+      margin-bottom: 1rem;
+    }
+
+    .svg-container svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .demo-card .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    /* Code Example */
+    .code-section {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .code-section pre {
+      color: #d4d4d4;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .keyword { color: #569cd6; }
+    .string { color: #ce9178; }
+    .comment { color: #6a9955; }
+    .function { color: #dcdcaa; }
+    .number { color: #b5cea8; }
+
+    /* Info Badge */
+    .info-badge {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 SVG Animator</h1>
+    <p class="subtitle">Pure TypeScript library for procedural SVG animations - Test it live!</p>
+
+    <!-- Upload & Test Section -->
+    <div class="main-panel">
+      <h2 class="panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+        </svg>
+        Upload Your SVG
+        <span class="info-badge">Test Any SVG</span>
+      </h2>
+
+      <div class="upload-section">
+        <div class="upload-zone" id="uploadZone">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+          </svg>
+          <h3>Drop SVG here</h3>
+          <p>or click to browse</p>
+          <input type="file" id="fileInput" accept=".svg,image/svg+xml">
+        </div>
+
+        <div class="preview-area" id="previewArea">
+          <div class="empty-state">
+            <p>Upload an SVG to preview and test animations</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animation Controls -->
+      <div style="margin-top: 2rem;">
+        <h3 style="color: #333; margin-bottom: 1rem;">Animation Settings</h3>
+        <div class="controls-grid">
+          <div class="control-group">
+            <label>Animation Mode</label>
+            <select id="animMode">
+              <option value="auto">Auto (Smart Detection)</option>
+              <option value="draw">Draw (Stroke)</option>
+              <option value="fade">Fade In</option>
+              <option value="scale">Scale</option>
+              <option value="slide">Slide</option>
+              <option value="rotate">Rotate</option>
+              <option value="pulse">Pulse</option>
+              <option value="bounce">Bounce</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>Duration (ms)</label>
+            <input type="number" id="animDuration" value="1000" min="100" max="5000" step="100">
+          </div>
+
+          <div class="control-group">
+            <label>Stagger (ms)</label>
+            <input type="number" id="animStagger" value="50" min="0" max="500" step="10">
+          </div>
+
+          <div class="control-group">
+            <label>Easing</label>
+            <select id="animEasing">
+              <option value="ease-out">Ease Out</option>
+              <option value="ease-in">Ease In</option>
+              <option value="ease-in-out">Ease In-Out</option>
+              <option value="linear">Linear</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group" style="margin-top: 1.5rem;">
+          <button class="btn btn-primary" id="playBtn" disabled>
+            ▶️ Play Animation
+          </button>
+          <button class="btn btn-secondary" id="resetBtn" disabled>
+            🔄 Reset
+          </button>
+          <button class="btn btn-secondary" id="pauseBtn" disabled>
+            ⏸️ Pause
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demo Examples -->
+    <div class="main-panel">
+      <h2 class="panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+        Built-in Examples
+      </h2>
+
+      <div class="demo-grid">
+        <!-- Example 1: Geometric -->
+        <div class="demo-card">
+          <h3>Geometric Shapes</h3>
+          <p>Auto-detected animations</p>
+          <div class="svg-container">
+            <svg id="demo-geometric" viewBox="0 0 200 200" width="140" height="140">
+              <circle cx="50" cy="50" r="30" fill="#667eea" />
+              <rect x="100" y="20" width="60" height="60" fill="#764ba2" rx="8" />
+              <polygon points="50,120 80,180 20,180" fill="#f093fb" />
+              <path d="M 120 120 Q 150 100 180 120 Q 150 140 120 120" fill="#f5576c" />
+            </svg>
+          </div>
+          <button class="btn btn-primary" onclick="playExample('demo-geometric')">▶️ Animate</button>
+        </div>
+
+        <!-- Example 2: Paths -->
+        <div class="demo-card">
+          <h3>Path Drawing</h3>
+          <p>Stroke animation effect</p>
+          <div class="svg-container">
+            <svg id="demo-paths" viewBox="0 0 200 200" width="140" height="140">
+              <path d="M 20 100 Q 50 20 100 100 T 180 100" fill="none" stroke="#667eea" stroke-width="4" />
+              <path d="M 20 140 L 180 140" fill="none" stroke="#764ba2" stroke-width="4" />
+              <polyline points="20,180 60,160 100,180 140,160 180,180" fill="none" stroke="#f093fb" stroke-width="4" />
+            </svg>
+          </div>
+          <button class="btn btn-primary" onclick="playExample('demo-paths')">▶️ Animate</button>
+        </div>
+
+        <!-- Example 3: Icon -->
+        <div class="demo-card">
+          <h3>Heart Icon</h3>
+          <p>Complex path animation</p>
+          <div class="svg-container">
+            <svg id="demo-icon" viewBox="0 0 24 24" width="100" height="100">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                    fill="none" stroke="#f5576c" stroke-width="2" />
+            </svg>
+          </div>
+          <button class="btn btn-primary" onclick="playExample('demo-icon')">▶️ Animate</button>
+        </div>
+
+        <!-- Example 4: Chart -->
+        <div class="demo-card">
+          <h3>Bar Chart</h3>
+          <p>Data visualization</p>
+          <div class="svg-container">
+            <svg id="demo-chart" viewBox="0 0 200 150" width="160" height="120">
+              <rect x="20" y="90" width="25" height="50" fill="#667eea" rx="4" />
+              <rect x="55" y="60" width="25" height="80" fill="#764ba2" rx="4" />
+              <rect x="90" y="40" width="25" height="100" fill="#f093fb" rx="4" />
+              <rect x="125" y="70" width="25" height="70" fill="#f5576c" rx="4" />
+              <rect x="160" y="30" width="25" height="110" fill="#4facfe" rx="4" />
+            </svg>
+          </div>
+          <button class="btn btn-primary" onclick="playExample('demo-chart')">▶️ Animate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code Example -->
+    <div class="main-panel">
+      <h2 class="panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Usage Example
+      </h2>
+
+      <div class="code-section">
+        <pre><span class="comment">// Import the library</span>
+<span class="keyword">import</span> { animate } <span class="keyword">from</span> <span class="string">'./dist/svg-animator.js'</span>;
+
+<span class="comment">// Animate any SVG element</span>
+<span class="keyword">const</span> animator = <span class="function">animate</span>(<span class="string">'#my-svg'</span>, {
+  mode: <span class="string">'auto'</span>,        <span class="comment">// Auto-detect best animation</span>
+  duration: <span class="number">1500</span>,      <span class="comment">// Animation duration in ms</span>
+  stagger: <span class="number">100</span>,        <span class="comment">// Delay between elements</span>
+  easing: <span class="string">'ease-out'</span>,  <span class="comment">// Timing function</span>
+  autoPlay: <span class="keyword">true</span>,     <span class="comment">// Start immediately</span>
+});
+
+<span class="comment">// Control the animation</span>
+animator.<span class="function">play</span>();      <span class="comment">// Start animation</span>
+animator.<span class="function">pause</span>();     <span class="comment">// Pause</span>
+animator.<span class="function">resume</span>();    <span class="comment">// Resume</span>
+animator.<span class="function">reset</span>();     <span class="comment">// Reset to beginning</span>
+animator.<span class="function">reverse</span>();   <span class="comment">// Play in reverse</span>
+
+<span class="comment">// Animation modes: auto, draw, fade, scale, slide, rotate, pulse, bounce</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import our library -->
+  <script type="module">
+    import { animate } from './dist/index.mjs';
+
+    // Global animator reference
+    let currentAnimator = null;
+    let exampleAnimators = {};
+
+    // Get configuration from UI
+    function getConfig() {
+      return {
+        mode: document.getElementById('animMode').value,
+        duration: parseInt(document.getElementById('animDuration').value),
+        stagger: parseInt(document.getElementById('animStagger').value),
+        easing: document.getElementById('animEasing').value,
+        autoPlay: false,
+      };
+    }
+
+    // Upload handling
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewArea = document.getElementById('previewArea');
+    const playBtn = document.getElementById('playBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type === 'image/svg+xml') {
+        handleFile(file);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        handleFile(file);
+      }
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const svgContent = e.target.result;
+        displaySVG(svgContent);
+      };
+      reader.readAsText(file);
+    }
+
+    function displaySVG(svgContent) {
+      // Clear previous
+      if (currentAnimator) {
+        currentAnimator.destroy();
+        currentAnimator = null;
+      }
+
+      previewArea.innerHTML = svgContent;
+      const svg = previewArea.querySelector('svg');
+
+      if (svg) {
+        // Make SVG responsive
+        if (!svg.hasAttribute('viewBox') && svg.hasAttribute('width') && svg.hasAttribute('height')) {
+          const width = svg.getAttribute('width');
+          const height = svg.getAttribute('height');
+          svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        }
+        svg.style.maxWidth = '100%';
+        svg.style.height = 'auto';
+
+        // Enable buttons
+        playBtn.disabled = false;
+        resetBtn.disabled = false;
+        pauseBtn.disabled = false;
+
+        // Initialize animator
+        initializeAnimator(svg);
+      }
+    }
+
+    function initializeAnimator(svg) {
+      if (currentAnimator) {
+        currentAnimator.destroy();
+      }
+      currentAnimator = animate(svg, getConfig());
+    }
+
+    // Button handlers
+    playBtn.addEventListener('click', () => {
+      if (currentAnimator) {
+        currentAnimator.play();
+      }
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (currentAnimator) {
+        currentAnimator.reset();
+      }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (currentAnimator) {
+        if (currentAnimator.state.isPaused) {
+          currentAnimator.resume();
+          pauseBtn.textContent = '⏸️ Pause';
+        } else {
+          currentAnimator.pause();
+          pauseBtn.textContent = '▶️ Resume';
+        }
+      }
+    });
+
+    // Update animator when settings change
+    ['animMode', 'animDuration', 'animStagger', 'animEasing'].forEach(id => {
+      document.getElementById(id).addEventListener('change', () => {
+        if (currentAnimator) {
+          const svg = previewArea.querySelector('svg');
+          if (svg) {
+            initializeAnimator(svg);
+          }
+        }
+      });
+    });
+
+    // Example demos
+    window.playExample = function(id) {
+      if (exampleAnimators[id]) {
+        exampleAnimators[id].destroy();
+      }
+      exampleAnimators[id] = animate(`#${id}`, {
+        mode: 'auto',
+        duration: 1000,
+        stagger: 50,
+        easing: 'ease-out',
+        autoPlay: false,
+      });
+      exampleAnimators[id].play();
+    };
+  </script>
+</body>
+</html>
