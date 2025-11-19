@@ -1,5 +1,5 @@
 /**
- * SVG Animator - Pure TypeScript SVG Animation Library
+ * Animatus SVG - Pure TypeScript SVG Animation Library
  * 
  * Automatically animates SVG elements with procedurally generated animations.
  * Zero dependencies, works with any framework.

@@ -1,5 +1,5 @@
 /**
- * SVG Animator - Main animation engine
+ * Animatus SVG - Main animation engine
  */
 
 import {
@@ -15,7 +15,7 @@ import { parseSVG, flattenElements } from './parser';
 import { createAnimation } from './animations';
 
 /**
- * Main SVG Animator class
+ * Main Animatus SVG class
  */
 export class SVGAnimator implements SVGAnimatorInstance {
   private svg: SVGElement;

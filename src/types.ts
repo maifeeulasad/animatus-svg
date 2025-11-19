@@ -1,5 +1,5 @@
 /**
- * SVG Animator - Type Definitions
+ * Animatus SVG - Type Definitions
  * Pure TypeScript SVG animation library
  */
 
@@ -138,7 +138,7 @@ export interface AnimationState {
   currentTime: number;
 }
 
-// SVG Animator instance interface
+// Animatus SVG instance interface
 export interface SVGAnimatorInstance {
   // Control methods
   play(): Promise<void>;
