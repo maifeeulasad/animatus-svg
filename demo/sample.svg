@@ -1,0 +1,24 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="200" cy="200" r="180" fill="none" stroke="#667eea" stroke-width="3"/>
+  
+  <!-- Geometric shapes -->
+  <circle cx="200" cy="100" r="30" fill="#764ba2"/>
+  <rect x="170" y="170" width="60" height="60" fill="#f093fb" rx="8"/>
+  <polygon points="200,280 230,340 170,340" fill="#f5576c"/>
+  
+  <!-- Decorative paths -->
+  <path d="M 100 200 Q 150 150 200 200 T 300 200" 
+        fill="none" stroke="#4facfe" stroke-width="4"/>
+  
+  <path d="M 60 120 L 340 280" 
+        fill="none" stroke="#00f2fe" stroke-width="2" opacity="0.5"/>
+  
+  <path d="M 60 280 L 340 120" 
+        fill="none" stroke="#43e97b" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Text -->
+  <text x="200" y="380" text-anchor="middle" font-size="24" font-weight="bold" fill="#333">
+    Animatus SVG
+  </text>
+</svg>
