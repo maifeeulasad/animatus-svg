@@ -4,6 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/animatus-svg.svg)](https://www.npmjs.com/package/animatus-svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Bundle Size](https://img.shields.io/bundlephobia/minzip/animatus-svg)](https://bundlephobia.com/package/animatus-svg)
 
 ## Installation
 ```bash
