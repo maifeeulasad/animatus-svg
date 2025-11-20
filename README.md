@@ -1,5 +1,7 @@
 # animatus-svg
 
+[![npm version](https://badge.fury.io/js/animatus-svg.svg)](https://badge.fury.io/js/animatus-svg)
+
 ## Installation
 ```bash
 npm i animatus-svg
