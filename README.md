@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/animatus-svg)](https://bundlephobia.com/package/animatus-svg)
+[![GitHub stars](https://img.shields.io/github/stars/maifeeulasad/animatus-svg.svg?style=social&label=Star)](https://github.com/maifeeulasad/animatus-svg)
 
 ## Installation
 ```bash
