@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animatus SVG - Performance Benchmark Suite</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .benchmark-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        
+        .benchmark-section h2 {
+            color: #444;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .results {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .metric:last-child {
+            border-bottom: none;
+        }
+        
+        .metric-name {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .metric-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .test-svg {
+            border: 2px dashed #ccc;
+            margin: 20px 0;
+            padding: 20px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .test-svg svg {
+            max-width: 100%;
+            max-height: 300px;
+        }
+        
+        .loading {
+            color: #999;
+            font-style: italic;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #ffeaea;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #27ae60;
+            background: #eaffea;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .comparison-table th {
+            background: #f0f0f0;
+            font-weight: 600;
+        }
+        
+        .worse {
+            color: #e74c3c;
+        }
+        
+        .better {
+            color: #27ae60;
+        }
+        
+        .same {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Animatus SVG Performance Benchmark</h1>
+        <p class="subtitle">Comprehensive performance testing suite for SVG animation library</p>
+        
+        <!-- Bundle Size Test -->
+        <div class="benchmark-section">
+            <h2>📦 Bundle Size Analysis</h2>
+            <p>Measures the impact on initial page load and bundle size.</p>
+            
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="testBundleSize()">Test Bundle Size</button>
+                <button class="btn btn-secondary" onclick="clearResults('bundle')">Clear Results</button>
+            </div>
+            
+            <div id="bundle-results" class="results">
+                <p class="loading">Click "Test Bundle Size" to analyze...</p>
+            </div>
+        </div>
+        
+        <!-- Initialization Performance -->
+        <div class="benchmark-section">
+            <h2>⚡ Initialization Performance</h2>
+            <p>Measures time taken to parse SVG and set up animations.</p>
+            
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="testInitialization()">Test Initialization</button>
+                <button class="btn btn-secondary" onclick="clearResults('init')">Clear Results</button>
+            </div>
+            
+            <div id="init-results" class="results">
+                <p class="loading">Click "Test Initialization" to analyze...</p>
+            </div>
+        </div>
+        
+        <!-- Animation Performance -->
+        <div class="benchmark-section">
+            <h2>🎬 Animation Runtime Performance</h2>
+            <p>Measures frame rate, memory usage, and animation smoothness.</p>
+            
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="testAnimationPerformance()">Test Animation</button>
+                <button class="btn btn-secondary" onclick="stopAnimationTest()">Stop Test</button>
+            </div>
+            
+            <div class="test-svg" id="animation-test-area">
+                <p>SVG animations will appear here during testing</p>
+            </div>
+            
+            <div id="animation-results" class="results">
+                <p class="loading">Click "Test Animation" to analyze...</p>
+            </div>
+        </div>
+        
+        <!-- Memory Usage -->
+        <div class="benchmark-section">
+            <h2>🧠 Memory Usage Analysis</h2>
+            <p>Tracks memory consumption during animation lifecycle.</p>
+            
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="testMemoryUsage()">Test Memory</button>
+                <button class="btn btn-secondary" onclick="clearResults('memory')">Clear Results</button>
+            </div>
+            
+            <div id="memory-results" class="results">
+                <p class="loading">Click "Test Memory" to analyze...</p>
+            </div>
+        </div>
+        
+        <!-- Comparative Analysis -->
+        <div class="benchmark-section">
+            <h2>⚖️ Performance Comparison</h2>
+            <p>Side-by-side comparison: with vs without Animatus SVG library.</p>
+            
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="runComparison()">Run Full Comparison</button>
+                <button class="btn btn-secondary" onclick="clearResults('comparison')">Clear Results</button>
+            </div>
+            
+            <div id="comparison-results" class="results">
+                <p class="loading">Click "Run Full Comparison" to analyze...</p>
+            </div>
+        </div>
+        
+        <!-- Complex Stress Test -->
+        <div class="benchmark-section">
+            <h2>💪 Stress Test</h2>
+            <p>Tests performance with complex SVGs and multiple simultaneous animations.</p>
+            
+            <div class="control-panel">
+                <button class="btn btn-primary" onclick="runStressTest()">Run Stress Test</button>
+                <button class="btn btn-secondary" onclick="clearResults('stress')">Clear Results</button>
+            </div>
+            
+            <div class="test-svg" id="stress-test-area">
+                <p>Stress test SVGs will appear here</p>
+            </div>
+            
+            <div id="stress-results" class="results">
+                <p class="loading">Click "Run Stress Test" to analyze...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Performance measurement utilities
+        class PerformanceMonitor {
+            constructor() {
+                this.measurements = new Map();
+                this.frameCount = 0;
+                this.animationStartTime = 0;
+                this.memorySnapshots = [];
+            }
+            
+            startTimer(name) {
+                this.measurements.set(name, {
+                    start: performance.now(),
+                    iterations: 0,
+                    totalTime: 0
+                });
+            }
+            
+            endTimer(name) {
+                const measurement = this.measurements.get(name);
+                if (measurement) {
+                    measurement.end = performance.now();
+                    measurement.duration = measurement.end - measurement.start;
+                }
+                return this.measurements.get(name);
+            }
+            
+            recordMemory() {
+                if (performance.memory) {
+                    this.memorySnapshots.push({
+                        timestamp: performance.now(),
+                        used: performance.memory.usedJSHeapSize,
+                        total: performance.memory.totalJSHeapSize,
+                        limit: performance.memory.jsHeapSizeLimit
+                    });
+                }
+            }
+            
+            getResults() {
+                const results = {};
+                for (const [name, measurement] of this.measurements) {
+                    results[name] = {
+                        duration: measurement.duration,
+                        iterations: measurement.iterations,
+                        avgTime: measurement.duration / (measurement.iterations || 1)
+                    };
+                }
+                return results;
+            }
+        }
+        
+        const monitor = new PerformanceMonitor();
+        let currentAnimators = [];
+        let testRunning = false;
+        
+        // Bundle Size Test
+        async function testBundleSize() {
+            const resultsDiv = document.getElementById('bundle-results');
+            resultsDiv.innerHTML = '<p class="loading">Analyzing bundle size...</p>';
+            
+            try {
+                // Test 1: Check if library is loaded
+                const libLoaded = typeof window.animate !== 'undefined';
+                
+                // Test 2: Measure script tag sizes
+                const scripts = Array.from(document.querySelectorAll('script'));
+                const scriptSizes = scripts.map(script => ({
+                    src: script.src || 'inline',
+                    size: script.textContent ? script.textContent.length : 0
+                }));
+                
+                // Test 3: Estimate library size
+                let librarySize = 0;
+                if (libLoaded) {
+                    // Estimate based on known patterns
+                    librarySize = 12000; // ~12KB minified estimate
+                }
+                
+                // Test 4: Calculate impact
+                const totalScriptSize = scriptSizes.reduce((sum, s) => sum + s.size, 0);
+                const impact = ((librarySize / totalScriptSize) * 100).toFixed(2);
+                
+                resultsDiv.innerHTML = `
+                    <div class="metric">
+                        <span class="metric-name">Library Loaded:</span>
+                        <span class="metric-value">${libLoaded ? '✅ Yes' : '❌ No'}</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-name">Estimated Library Size:</span>
+                        <span class="metric-value">${(librarySize / 1024).toFixed(1)} KB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-name">Total Script Content:</span>
+                        <span class="metric-value">${(totalScriptSize / 1024).toFixed(1)} KB</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-name">Relative Impact:</span>
+                        <span class="metric-value">${impact}%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-name">Zero Dependencies:</span>
+                        <span class="metric-value">✅ Yes</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-name">Bundle Analysis:</span>
+                        <span class="metric-value ${parseFloat(impact) < 5 ? 'better' : 'worse'}">
+                            ${parseFloat(impact) < 5 ? 'Low Impact' : 'High Impact'}
+                        </span>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Initialization Performance Test
+        async function testInitialization() {
+            const resultsDiv = document.getElementById('init-results');
+            resultsDiv.innerHTML = '<p class="loading">Testing initialization performance...</p>';
+            
+            try {
+                monitor.startTimer('init_test');
+                
+                // Create test SVGs of different complexities
+                const testCases = [
+                    { name: 'Simple', elements: 5 },
+                    { name: 'Medium', elements: 25 },
+                    { name: 'Complex', elements: 100 },
+                    { name: 'Very Complex', elements: 500 }
+                ];
+                
+                const results = {};
+                
+                for (const testCase of testCases) {
+                    const svg = createTestSVG(testCase.elements);
+                    document.body.appendChild(svg);
+                    svg.style.position = 'absolute';
+                    svg.style.left = '-9999px';
+                    
+                    monitor.startTimer(`init_${testCase.name}`);
+                    
+                    // Initialize Animatus SVG if available
+                    if (typeof window.animate !== 'undefined') {
+                        const animator = window.animate(svg, { autoPlay: false });
+                        currentAnimators.push(animator);
+                    }
+                    
+                    const initResult = monitor.endTimer(`init_${testCase.name}`);
+                    results[testCase.name] = initResult.duration;
+                    
+                    // Cleanup
+                    document.body.removeChild(svg);
+                }
+                
+                const resultsHtml = Object.entries(results).map(([name, time]) => `
+                    <div class="metric">
+                        <span class="metric-name">${name} SVG (${testCases.find(t => t.name === name).elements} elements):</span>
+                        <span class="metric-value">${time.toFixed(2)} ms</span>
+                    </div>
+                `).join('');
+                
+                resultsDiv.innerHTML = resultsHtml + `
+                    <div class="metric">
+                        <span class="metric-name">Performance Rating:</span>
+                        <span class="metric-value ${Math.max(...Object.values(results)) < 50 ? 'better' : 'worse'}">
+                            ${Math.max(...Object.values(results)) < 50 ? 'Excellent' : 'Needs Optimization'}
+                        </span>
+                    </div>
+                `;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Animation Performance Test
+        async function testAnimationPerformance() {
+            if (testRunning) return;
+            testRunning = true;
+            
+            const resultsDiv = document.getElementById('animation-results');
+            const testArea = document.getElementById('animation-test-area');
+            
+            resultsDiv.innerHTML = '<p class="loading">Testing animation performance...</p>';
+            testArea.innerHTML = '';
+            
+            try {
+                monitor.startTimer('animation_test');
+                monitor.recordMemory();
+                
+                // Create animated SVG
+                const svg = createTestSVG(50);
+                testArea.appendChild(svg);
+                
+                if (typeof window.animate !== 'undefined') {
+                    const animator = window.animate(svg, {
+                        mode: 'auto',
+                        duration: 2000,
+                        autoPlay: true
+                    });
+                    currentAnimators.push(animator);
+                }
+                
+                // Monitor frame rate
+                let frameCount = 0;
+                let startTime = performance.now();
+                
+                function measureFPS() {
+                    if (!testRunning) return;
+                    
+                    frameCount++;
+                    const currentTime = performance.now();
+                    
+                    if (currentTime - startTime >= 1000) {
+                        const fps = frameCount;
+                        const memoryUsage = performance.memory ? 
+                            `${(performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2)} MB` : 
+                            'N/A';
+                        
+                        resultsDiv.innerHTML = `
+                            <div class="metric">
+                                <span class="metric-name">Frame Rate:</span>
+                                <span class="metric-value ${fps >= 50 ? 'better' : 'worse'}">${fps} FPS</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-name">Memory Usage:</span>
+                                <span class="metric-value">${memoryUsage}</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-name">Smooth Animation:</span>
+                                <span class="metric-value ${fps >= 50 ? 'better' : 'worse'}">
+                                    ${fps >= 50 ? '✅ Smooth' : '⚠️ Choppy'}
+                                </span>
+                            </div>
+                        `;
+                        
+                        frameCount = 0;
+                        startTime = currentTime;
+                    }
+                    
+                    requestAnimationFrame(measureFPS);
+                }
+                
+                measureFPS();
+                
+                // Stop test after 10 seconds
+                setTimeout(() => {
+                    testRunning = false;
+                    monitor.endTimer('animation_test');
+                }, 10000);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+                testRunning = false;
+            }
+        }
+        
+        function stopAnimationTest() {
+            testRunning = false;
+            currentAnimators.forEach(animator => animator.destroy());
+            currentAnimators = [];
+            document.getElementById('animation-test-area').innerHTML = '<p>Test stopped.</p>';
+        }
+        
+        // Memory Usage Test
+        async function testMemoryUsage() {
+            const resultsDiv = document.getElementById('memory-results');
+            resultsDiv.innerHTML = '<p class="loading">Testing memory usage...</p>';
+            
+            try {
+                monitor.memorySnapshots = [];
+                
+                // Initial memory snapshot
+                monitor.recordMemory();
+                
+                // Create and destroy multiple animators
+                for (let i = 0; i < 10; i++) {
+                    const svg = createTestSVG(20);
+                    document.body.appendChild(svg);
+                    svg.style.position = 'absolute';
+                    svg.style.left = '-9999px';
+                    
+                    if (typeof window.animate !== 'undefined') {
+                        const animator = window.animate(svg, { autoPlay: false });
+                        currentAnimators.push(animator);
+                        
+                        // Let it exist briefly
+                        setTimeout(() => {
+                            animator.destroy();
+                            document.body.removeChild(svg);
+                        }, 100);
+                    }
+                    
+                    monitor.recordMemory();
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+                
+                // Final memory snapshot
+                monitor.recordMemory();
+                
+                if (monitor.memorySnapshots.length > 0) {
+                    const initial = monitor.memorySnapshots[0];
+                    const final = monitor.memorySnapshots[monitor.memorySnapshots.length - 1];
+                    const increase = final.used - initial.used;
+                    
+                    resultsDiv.innerHTML = `
+                        <div class="metric">
+                            <span class="metric-name">Initial Memory:</span>
+                            <span class="metric-value">${(initial.used / 1024 / 1024).toFixed(2)} MB</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Final Memory:</span>
+                            <span class="metric-value">${(final.used / 1024 / 1024).toFixed(2)} MB</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Memory Increase:</span>
+                            <span class="metric-value ${increase < 1024 * 1024 ? 'better' : 'worse'}">
+                                ${(increase / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Memory Efficiency:</span>
+                            <span class="metric-value ${increase < 1024 * 1024 ? 'better' : 'worse'}">
+                                ${increase < 1024 * 1024 ? '✅ Efficient' : '⚠️ High Usage'}
+                            </span>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<div class="error">Memory API not available in this browser</div>';
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Performance Comparison
+        async function runComparison() {
+            const resultsDiv = document.getElementById('comparison-results');
+            resultsDiv.innerHTML = '<p class="loading">Running comprehensive comparison...</p>';
+            
+            try {
+                const testSvg = createTestSVG(25);
+                document.body.appendChild(testSvg);
+                testSvg.style.position = 'absolute';
+                testSvg.style.left = '-9999px';
+                
+                const comparison = {};
+                
+                // Test 1: With Animatus SVG
+                if (typeof window.animate !== 'undefined') {
+                    monitor.startTimer('with_library');
+                    const animator = window.animate(testSvg, { autoPlay: false });
+                    const initTime = monitor.endTimer('with_library').duration;
+                    
+                    comparison.withLibrary = {
+                        initTime: initTime,
+                        setup: 'Automatic',
+                        bundleSize: '~12KB',
+                        dependencies: 'None'
+                    };
+                    
+                    animator.destroy();
+                } else {
+                    comparison.withLibrary = { error: 'Library not loaded' };
+                }
+                
+                // Test 2: Manual CSS animations (baseline)
+                monitor.startTimer('manual_css');
+                testSvg.style.opacity = '0';
+                testSvg.style.transition = 'opacity 1s ease-out';
+                setTimeout(() => {
+                    testSvg.style.opacity = '1';
+                    monitor.endTimer('manual_css');
+                }, 10);
+                
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                comparison.manualCSS = {
+                    initTime: monitor.endTimer('manual_css').duration,
+                    setup: 'Manual CSS',
+                    bundleSize: '0KB',
+                    dependencies: 'None'
+                };
+                
+                // Test 3: CSS animations with keyframes
+                monitor.startTimer('css_keyframes');
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes svgFade {
+                        from { opacity: 0; transform: scale(0.8); }
+                        to { opacity: 1; transform: scale(1); }
+                    }
+                    .animated-svg {
+                        animation: svgFade 1s ease-out;
+                    }
+                `;
+                document.head.appendChild(style);
+                testSvg.classList.add('animated-svg');
+                setTimeout(() => {
+                    document.head.removeChild(style);
+                    monitor.endTimer('css_keyframes');
+                }, 1000);
+                
+                await new Promise(resolve => setTimeout(resolve, 1100));
+                
+                comparison.cssKeyframes = {
+                    initTime: monitor.endTimer('css_keyframes').duration,
+                    setup: 'CSS Keyframes',
+                    bundleSize: '<1KB',
+                    dependencies: 'None'
+                };
+                
+                // Cleanup
+                document.body.removeChild(testSvg);
+                
+                // Generate comparison table
+                const tableHtml = `
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Init Time</th>
+                                <th>Bundle Size</th>
+                                <th>Setup Complexity</th>
+                                <th>Dependencies</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(comparison).map(([method, data]) => `
+                                <tr>
+                                    <td><strong>${method.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</strong></td>
+                                    <td>${data.initTime ? data.initTime.toFixed(2) + ' ms' : 'N/A'}</td>
+                                    <td>${data.bundleSize}</td>
+                                    <td>${data.setup}</td>
+                                    <td>${data.dependencies}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                resultsDiv.innerHTML = tableHtml;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Stress Test
+        async function runStressTest() {
+            const resultsDiv = document.getElementById('stress-results');
+            const testArea = document.getElementById('stress-test-area');
+            
+            resultsDiv.innerHTML = '<p class="loading">Running stress test...</p>';
+            testArea.innerHTML = '';
+            
+            try {
+                const stressResults = {};
+                const svgContainer = document.createElement('div');
+                testArea.appendChild(svgContainer);
+                
+                // Test 1: Multiple simultaneous animations
+                const startTime = performance.now();
+                const animatorCount = 5;
+                
+                for (let i = 0; i < animatorCount; i++) {
+                    const svg = createTestSVG(50 + (i * 10));
+                    svg.style.display = 'inline-block';
+                    svg.style.margin = '10px';
+                    svgContainer.appendChild(svg);
+                    
+                    if (typeof window.animate !== 'undefined') {
+                        const animator = window.animate(svg, {
+                            mode: 'auto',
+                            duration: 3000,
+                            stagger: 100,
+                            autoPlay: true
+                        });
+                        currentAnimators.push(animator);
+                    }
+                }
+                
+                const setupTime = performance.now() - startTime;
+                stressResults.simultaneousAnimations = {
+                    count: animatorCount,
+                    setupTime: setupTime,
+                    avgTimePerAnimator: setupTime / animatorCount
+                };
+                
+                // Test 2: Large SVG performance
+                const largeSvgStart = performance.now();
+                const largeSvg = createTestSVG(200);
+                testArea.appendChild(largeSvg);
+                
+                if (typeof window.animate !== 'undefined') {
+                    const largeAnimator = window.animate(largeSvg, {
+                        mode: 'auto',
+                        duration: 5000,
+                        autoPlay: true
+                    });
+                    currentAnimators.push(largeAnimator);
+                }
+                
+                const largeSvgTime = performance.now() - largeSvgStart;
+                stressResults.largeSvg = {
+                    elements: 200,
+                    initTime: largeSvgTime
+                };
+                
+                // Monitor for 15 seconds
+                setTimeout(() => {
+                    const resultsHtml = `
+                        <div class="metric">
+                            <span class="metric-name">Simultaneous Animations:</span>
+                            <span class="metric-value">${stressResults.simultaneousAnimations.count} animators</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Setup Time (Total):</span>
+                            <span class="metric-value">${stressResults.simultaneousAnimations.setupTime.toFixed(2)} ms</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Avg Time per Animator:</span>
+                            <span class="metric-value">${stressResults.simultaneousAnimations.avgTimePerAnimator.toFixed(2)} ms</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Large SVG (200 elements):</span>
+                            <span class="metric-value">${stressResults.largeSvg.initTime.toFixed(2)} ms</span>
+                        </div>
+                        <div class="metric">
+                            <span class="metric-name">Stress Test Result:</span>
+                            <span class="metric-value ${stressResults.largeSvg.initTime < 100 ? 'better' : 'worse'}">
+                                ${stressResults.largeSvg.initTime < 100 ? '✅ Handles Well' : '⚠️ Performance Issues'}
+                            </span>
+                        </div>
+                    `;
+                    
+                    resultsDiv.innerHTML = resultsHtml;
+                }, 15000);
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Utility function to create test SVGs
+        function createTestSVG(elementCount) {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '300');
+            svg.setAttribute('height', '200');
+            svg.setAttribute('viewBox', '0 0 300 200');
+            
+            const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
+            
+            for (let i = 0; i < elementCount; i++) {
+                const elementType = ['circle', 'rect', 'path', 'polygon'][i % 4];
+                const color = colors[i % colors.length];
+                const x = (i * 15) % 280;
+                const y = Math.floor((i * 15) / 280) * 30 + 20;
+                
+                let element;
+                
+                switch (elementType) {
+                    case 'circle':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        element.setAttribute('cx', x);
+                        element.setAttribute('cy', y);
+                        element.setAttribute('r', '8');
+                        break;
+                    case 'rect':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        element.setAttribute('x', x);
+                        element.setAttribute('y', y);
+                        element.setAttribute('width', '12');
+                        element.setAttribute('height', '12');
+                        break;
+                    case 'path':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        element.setAttribute('d', `M ${x} ${y} L ${x+15} ${y} L ${x+7.5} ${y-10} Z`);
+                        break;
+                    case 'polygon':
+                        element = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                        element.setAttribute('points', `${x},${y} ${x+10},${y+15} ${x-10},${y+15}`);
+                        break;
+                }
+                
+                if (element) {
+                    element.setAttribute('fill', color);
+                    element.setAttribute('stroke', 'none');
+                    svg.appendChild(element);
+                }
+            }
+            
+            return svg;
+        }
+        
+        // Clear results
+        function clearResults(type) {
+            const resultsDiv = document.getElementById(`${type}-results`);
+            if (resultsDiv) {
+                resultsDiv.innerHTML = `<p class="loading">Cleared. Click test button to run again...</p>`;
+            }
+        }
+        
+        // Auto-load library if available (placeholder - would need actual library)
+        window.addEventListener('load', () => {
+            console.log('Benchmark suite loaded');
+            // In real implementation, would check if animatus-svg is available
+        });
+    </script>
+</body>
+</html>

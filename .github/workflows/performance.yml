@@ -1,0 +1,158 @@
+name: Performance Benchmarks
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Run bundle size analysis
+        run: pnpm perf:bundle
+
+      - name: Run performance benchmarks
+        run: pnpm perf:benchmark
+
+      - name: Run comparison benchmarks
+        run: pnpm perf:comparison
+
+      - name: Upload bundle size report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-size-report
+          path: performance/bundle-size-report.json
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report
+          path: performance/performance-report.json
+
+      - name: Upload comparison report
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparison-report
+          path: performance/comparison-report.json
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        usesconst compReport = JSON.parse(fs.readFileSync('performance/comparison-report.json', 'utf8'));
+            
+            const formatBytes = (bytes) => {
+              if (bytes === 0) return '0 B';
+              const k = 1024;
+              const sizes = ['B', 'KB', 'MB'];
+              const i = Math.floor(Math.log(bytes) / Math.log(k));
+              return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+            };
+            
+            const bundleRank = compReport.summary.bundleRanking.indexOf('Animatus SVG') + 1;
+            
+            const comment = `## Performance Benchmark Results
+            
+            ### Bundle Size
+            - **Raw Total:** ${(bundleReport.totalRaw / 1024).toFixed(2)} KB
+            - **Estimated Minified:** ${(bundleReport.estimatedMinified / 1024).toFixed(2)} KB
+            - **Estimated Gzipped:** ${(bundleReport.estimatedGzipped / 1024).toFixed(2)} KB
+            - **Page Impact:** ${bundleReport.impactPercentage.toFixed(2)}%
+            
+            ### Performance Summary
+            - **Avg Operation Time:** ${perfReport.summary.avgOperationTime.toFixed(4)}ms
+            - **Max Ops/Second:** ${perfReport.summary.maxOpsPerSecond.toFixed(0)}
+            - **Avg Cleanup Efficiency:** ${perfReport.summary.avgCleanupEfficiency.toFixed(1)}%
+            - **Total Tests:** ${perfReport.summary.totalTests}
+            
+            ### Comparison vs Competitors
+            - **Bundle Size Rank:** #${bundleRank} out of ${compReport.summary.bundleRanking.length}
+            - **Animatus SVG:** ${formatBytes(compReport.animatusSvg.gzippedSize)}
+            - **GSAP:** ${formatBytes(compReport.competitors.find(c => c.name === 'GSAP').gzippedSize)}
+            - **Framer Motion:** ${formatBytes(compReport.competitors.find(c => c.name === 'Framer Motion').gzippedSize)}
+            - **Anime.js:** ${formatBytes(compReport.competitors.find(c => c.name === 'Anime.js').gzippedSize)}
+            
+            <details>
+            <summary>View Detailed Results</summary>
+            
+            #### File Sizes
+            ${bundleReport.files.map(f => `- ${f.path}: ${(f.bytes / 1024).toFixed(2)} KB (${f.lines} lines)`).join('\n')}
+            
+            #### Comparison Table
+            | Library | Bundle | Gzipped | Features | Complexity |
+            |---------|--------|---------|----------|------------|
+            | Animatus SVG | ${formatBytes(compReport.animatusSvg.bundleSize)} | ${formatBytes(compReport.animatusSvg.gzippedSize)} | ${compReport.animatusSvg.features.length} | ${compReport.animatusSvg.complexity} |
+            ${compReport.competitors.map(c => `| ${c.name} | ${formatBytes(c.bundleSize)} | ${formatBytes(c.gzippedSize)} | ${c.features.length} | ${c.complexity} |
+            
+            <details>
+            <summary>View Detailed Results</summary>
+            
+            #### File Sizes
+            ${bundleReport.files.map(f => `- ${f.path}: ${(f.bytes / 1024).toFixed(2)} KB (${f.lines} lines)`).join('\n')}
+            
+            </details>`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Check performance regression
+        run: |
+          echo "Checking for performance regressions..."
+          node -e "
+            const fs = require('fs');
+            const perfReport = JSON.parse(fs.readFileSync('performance/performance-report.json', 'utf8'));
+            const bundleReport = JSON.parse(fs.readFileSync('performance/bundle-size-report.json', 'utf8'));
+            
+            // Set thresholds
+            const MAX_BUNDLE_SIZE_KB = 20;
+            const MAX_AVG_OP_TIME_MS = 0.1;
+            const MIN_CLEANUP_EFFICIENCY = 80;
+            
+            let failed = false;
+            
+            if (bundleReport.estimatedGzipped / 1024 > MAX_BUNDLE_SIZE_KB) {
+              console.error('FAIL: Bundle size exceeds threshold');
+              failed = true;
+            }
+            
+            if (perfReport.summary.avgOperationTime > MAX_AVG_OP_TIME_MS) {
+              console.error('FAIL: Average operation time exceeds threshold');
+              failed = true;
+            }
+            
+            if (perfReport.summary.avgCleanupEfficiency < MIN_CLEANUP_EFFICIENCY) {
+              console.error('FAIL: Cleanup efficiency below threshold');
+              failed = true;
+            }
+            
+            if (failed) {
+              process.exit(1);
+            } else {
+              console.log('All performance checks passed');
+            }
+          "
